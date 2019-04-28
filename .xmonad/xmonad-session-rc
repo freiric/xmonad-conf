@@ -1,0 +1,17 @@
+# start trayer on the top right corner
+trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false  --widthtype request --transparent true --tint 0x008080 --alpha 150 --height 24&
+
+export NO_AT_BRIDGE=1 
+XMODIFIERS="@im=none"; export XMODIFIERS
+#indicator-multiload --trayicon&
+xfce4-power-manager&
+nm-applet&
+volumeicon&
+thunderbird&
+davmail&
+#pidgin&
+## /opt/extras.ubuntu.com/calendar-indicator/bin/calendar-indicator&
+## guake&
+#quodlibet &# music
+#gxkb &# peut etre
+feh --bg-max --auto-rotate /ssd/Perso/Fotos/2018.06.27/20180614_124807.jpg &
