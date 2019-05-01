@@ -3,13 +3,10 @@
 import           XMonad
 -- Prompt
 import           XMonad.Prompt
-import           XMonad.Prompt.AppendFile       (appendFilePrompt)
 import           XMonad.Prompt.RunOrRaise       (runOrRaisePrompt)
-import           XMonad.Prompt.Shell            (prompt, safePrompt,
-                                                 shellPrompt)
+import           XMonad.Prompt.Shell            (prompt)
 
 -- Hooks
-import           XMonad.Operations
 
 import           System.Exit
 import           System.IO
@@ -18,16 +15,13 @@ import           XMonad.Util.Run
 
 
 import           XMonad.Actions.CycleWS
-import           XMonad.Actions.PhysicalScreens
-import           XMonad.Actions.Search          (google, promptSearch, scholar,
-                                                 selectSearch, wikipedia)
-import           XMonad.Actions.WindowGo        (raiseEditor, raiseMaybe,
+import           XMonad.Actions.Search          (google, promptSearch,
+                                                 selectSearch)
+import           XMonad.Actions.WindowGo        (raiseMaybe,
                                                  runOrRaise)
-import XMonad.Hooks.EwmhDesktops
-import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.EwmhDesktops
+import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.FadeInactive
-import           XMonad.Hooks.ManageDocks
 import           XMonad.Hooks.ManageDocks
 import           XMonad.Hooks.ManageHelpers
 import           XMonad.Hooks.SetWMName
@@ -36,44 +30,42 @@ import           XMonad.Hooks.UrgencyHook
 import           Data.Ratio                     ((%))
 import           XMonad.Layout.Grid
 import           XMonad.Layout.IM
-import           XMonad.Layout.LayoutHints
-import           XMonad.Layout.LayoutModifier
-import           XMonad.Layout.NoBorders        (noBorders, smartBorders, lessBorders, Ambiguity(OnlyFloat))
-import           XMonad.Layout.PerWorkspace     (onWorkspace, onWorkspaces)
+import           XMonad.Layout.NoBorders        (lessBorders, Ambiguity(OnlyScreenFloat))
+import           XMonad.Layout.PerWorkspace     (onWorkspaces)
 import           XMonad.Layout.Reflect          (reflectHoriz)
 import           XMonad.Layout.ResizableTile
 import           XMonad.Layout.SimpleFloat
-import           XMonad.Layout.Spacing
-import           XMonad.Util.Run
 
 import qualified Data.Map                       as M
 import qualified XMonad.StackSet                as W
-import XMonad.Config.Desktop
+import           XMonad.Config.Gnome
 
 --}}}
 
 -- Config {{{
 -- Define Terminal
+myTerminal:: [Char]
 myTerminal      = "gnome-terminal"
 -- myTerminal      = "lxterminal"
 -- Define modMask
 modMask' :: KeyMask
 modMask' = mod4Mask
 -- Define workspaces
+myWorkspaces:: [[Char]]
 myWorkspaces    = ["1:main","2:web","3:emacs","4:chat","5:music", "6:gimp", "7:misc", "8:eclipse", "9:intellinet"]
 -- Dzen/Conky
 --myXmonadBar = "dzen2 -x '1440' -y '0' -h '24' -w '640' -ta 'l' -fg '#FFFFFF' -bg '#1B1D1E'"
 -- option -e 'button3='  needed to prevent right click to kill the status bar
 -- https://github.com/robm/dzen/wiki/Events-and-actions
 myXmonadBar = "dzen2 -e 'button3=' -x '900' -y '0' -h '24' -w '700' -ta 'l' -fg '#FFFFFF' -bg '#1B1D1E'"
-myStatusBar = "conky -c /home/fb019397/.xmonad/.conky_dzen2 | dzen2 -e 'button3=' -x '0' -w '900' -h '24' -ta 'l' -bg '#1B1D1E' -fg '#FFFFFF' -y '0'"
-myBitmapsDir = "/home/fb019397/.xmonad/dzen2"
+myStatusBar = "conky -c $HOME/.xmonad/.conky_dzen2 | dzen2 -e 'button3=' -x '0' -w '900' -h '24' -ta 'l' -bg '#1B1D1E' -fg '#FFFFFF' -y '0'"
+myBitmapsDir = "$HOME/.xmonad/dzen2"
 --}}}
 -- Main {{{
 main = do
     dzenLeftBar <- spawnPipe myXmonadBar
     dzenRightBar <- spawnPipe myStatusBar
-    xmonad $ withUrgencyHookC dzenUrgencyHook { args = ["-bg", "red", "fg", "black", "-xs", "1", "-y", "20"] } urgencyConfig { remindWhen = Every 15 } $ ewmh desktopConfig
+    xmonad $ withUrgencyHookC dzenUrgencyHook { args = ["-bg", "red", "fg", "black", "-xs", "1", "-y", "20"] } urgencyConfig { remindWhen = Every 15 } $ gnomeConfig 
       { terminal            = myTerminal
       , workspaces          = myWorkspaces
       , keys                = keys'
@@ -134,7 +126,7 @@ myDoFullFloat :: ManageHook
 myDoFullFloat = --doF W.focusDown <+>
   doFullFloat
 -- }}}
-layoutHook'  =  lessBorders OnlyFloat  $ avoidStruts $
+layoutHook'  =  lessBorders OnlyScreenFloat  $ avoidStruts $
                 onWorkspaces ["1:main","5:music"] customLayout $
                 onWorkspaces ["6:gimp"] gimpLayout $
                 onWorkspaces ["4:chat"] imLayout $
@@ -143,7 +135,7 @@ layoutHook'  =  lessBorders OnlyFloat  $ avoidStruts $
 
 --Bar
 myLogHook :: Handle -> X ()
-myLogHook h = dynamicLogWithPP $ defaultPP
+myLogHook h = dynamicLogWithPP $ def
     {
         ppCurrent           =   dzenColor "#ebac54" "#1B1D1E"
       , ppVisible           =   dzenColor "white" "#1B1D1E"
@@ -204,15 +196,15 @@ xftFont = "xft: inconsolata-14"
 -- Prompt Config {{{
 mXPConfig :: XPConfig
 mXPConfig =
-    defaultXPConfig { font                  = barFont
-                    , bgColor               = colorDarkGray
-                    , fgColor               = colorGreen
-                    , bgHLight              = colorGreen
-                    , fgHLight              = colorDarkGray
-                    , promptBorderWidth     = 0
-                    , height                = 14
-                    , historyFilter         = deleteConsecutive
-                    }
+    def { font                  = barFont
+        , bgColor               = colorDarkGray
+        , fgColor               = colorGreen
+        , bgHLight              = colorGreen
+        , fgHLight              = colorDarkGray
+        , promptBorderWidth     = 0
+        , height                = 14
+        , historyFilter         = deleteConsecutive
+        }
 
 -- Run or Raise Menu
 largeXPConfig :: XPConfig
@@ -238,7 +230,7 @@ keys' conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- Programs
     , ((0,                          xK_Print    ), spawn "scrot -e 'mv $f ~/screenshots/'")
 --    , ((modMask,		            xK_o        ), spawn "chromium-browser")
-    , ((modMask,                    xK_m        ), spawn "nautilus --no-desktop --browser")
+    , ((modMask,                    xK_m        ), raiseMaybe (spawn "nautilus") (fmap (`elem` ["Org.gnome.Nautilus", "org.gnome.Nautilus"]) className))
     , ((modMask,                    xK_f        ), runOrRaise "firefox" (className =? "Firefox"))
     , ((modMask,              xK_o), spawn "emacsclient -nc")
     , ((modMask .|. shiftMask,xK_o), prompt "emacsclient -nc" greenXPConfig)
@@ -289,7 +281,7 @@ keys' conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. shiftMask,      xK_q        ), io (exitWith ExitSuccess))
     , ((modMask,                    xK_q        ), spawn myRestart)
     -- change keyboard layouts
-    , ((modMask .|. controlMask, xK_space), spawn "/home/fb019397/scripts/keyboard/keymap.sh")
+    , ((modMask .|. controlMask, xK_space), spawn "$HOME/scripts/keyboard/keymap.sh")
     ]
     ++
     -- mod-[1..9] %! Switch to workspace N
